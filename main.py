@@ -1,3 +1,4 @@
+import sys
 from tkinter import Tk, BOTH, Canvas
 
 
@@ -29,7 +30,7 @@ class Window:
     def close(self):
         self.running = False
         self.root.destroy()
-
+        sys.exit(0)
 
 class Point:
     def __init__(self, x_1=0, y_1=0):
