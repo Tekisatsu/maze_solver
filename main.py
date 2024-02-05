@@ -31,9 +31,28 @@ class Window:
         self.root.destroy()
 
 
+class Point:
+    def __init__(self, x_1=0, y_1=0):
+        self.x = x_1
+        self.y = y_1
+
+
+class Line:
+    def __init__(self, x_1, x_2, y_1, y_2, canvas, colour='black'):
+        self.coordinates = (x_1, x_2, y_1, y_2)
+        self.colour = colour
+        self.canvas = canvas
+
+    def draw(self):
+        self.canvas.create_line(*self.coordinates, fill=self.colour)
+
+
 def main():
     window = Window(600, 800)
+    line = Line(30, 30, 300, 300, window.canvas, 'blue')
+    line.draw()
     window.start()
+    window.wait_for_close()
 
 
 main()
