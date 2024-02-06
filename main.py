@@ -71,11 +71,23 @@ class Cell:
         if self.has_bottom_wall:
             Line(self._x1, self._y2, self._x2, self._y2, self._canvas).draw()
 
+    def draw_move(self, to_cell, undo=False):
+        center_x = (self._x1 + self._x2)//2
+        center_y = (self._y1 + self._y2)//2
+        to_cell_center_x = (to_cell._x1 + to_cell._x2)//2
+        to_cell_center_y = (to_cell._y1 + to_cell._y2)//2
+        if undo is True:
+            Line(center_x, center_y, to_cell_center_x, to_cell_center_y, self._canvas, 'grey').draw()
+        Line(center_x, center_y, to_cell_center_x, to_cell_center_y, self._canvas, 'red').draw()
+
 
 def main():
     window = Window(600, 800)
     cell = Cell(3, 2, 50, window.canvas)
     cell.draw()
+    second_cell = Cell(7, 8, 50, window.canvas)
+    second_cell.draw()
+    cell.draw_move(second_cell)
     window.start()
     window.wait_for_close()
 
