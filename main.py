@@ -32,6 +32,7 @@ class Window:
         self.root.destroy()
         sys.exit(0)
 
+
 class Point:
     def __init__(self, x_1=0, y_1=0):
         self.x = x_1
@@ -48,10 +49,33 @@ class Line:
         self.canvas.create_line(*self.coordinates, fill=self.colour)
 
 
+class Cell:
+    def __init__(self, i, j, size, canvas):
+        self.has_right_wall = True
+        self.has_left_wall = True
+        self.has_top_wall = True
+        self.has_bottom_wall = True
+        self._x1 = i*size
+        self._x2 = self._x1+size
+        self._y1 = j*size
+        self._y2 = self._y1+size
+        self._canvas = canvas
+
+    def draw(self):
+        if self.has_left_wall:
+            Line(self._x1, self._y1, self._x1, self._y2, self._canvas).draw()
+        if self.has_right_wall:
+            Line(self._x2, self._y1, self._x2, self._y2, self._canvas).draw()
+        if self.has_top_wall:
+            Line(self._x1, self._y1, self._x2, self._y1, self._canvas).draw()
+        if self.has_bottom_wall:
+            Line(self._x1, self._y2, self._x2, self._y2, self._canvas).draw()
+
+
 def main():
     window = Window(600, 800)
-    line = Line(30, 30, 300, 300, window.canvas, 'blue')
-    line.draw()
+    cell = Cell(3, 2, 50, window.canvas)
+    cell.draw()
     window.start()
     window.wait_for_close()
 
