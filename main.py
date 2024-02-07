@@ -179,6 +179,26 @@ class Maze:
             for k in i:
                 k.visited = False
 
+    def sove(self, i=0, j=0):
+        return self.s_solve_r(i, j)
+
+    def _solve_r(self, i, j):
+        self._animate()
+        self._cells[i][j].visited = True
+        if self._cells[i][j] == self._cells[self.num_cols-1][self.num_rows-1]:
+            return True
+        for direction in range(0, 4):
+            if self._cells[i-1][j] is not None and self._cells[i-1][j].has_right_wall = False and self._cells[i-1][j].visited = False:
+                Cell.draw_move(self._cells[i][j], self._cells[i-1][j])
+                result = self._solve_r(i-1, j)
+                if result is True:
+                    return True
+                else:
+                    Cell.draw_move(self._cells[i][j], self._cells[i-1][j], undo=True)
+
+
+
+
 
 def main():
     window = Window(800, 800)
