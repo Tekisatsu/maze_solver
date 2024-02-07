@@ -19,14 +19,8 @@ class Window:
         self.root.update_idletasks()
         self.root.update()
 
-    def wait_for_close(self):
-        self.running = True
-        while self.running:
-            self.redraw()
-
     def start(self):
         self.root.geometry(f'{self.width}x{self.height}')
-        self.wait_for_close()
         self.root.mainloop()
 
     def close(self):
@@ -66,13 +60,21 @@ class Cell:
 
     def draw(self, x1, y1, x2, y2):
         if self.has_left_wall:
-            Line(self._x1, self._y1, self._x1, self._y2, self._canvas).draw()
+            Line(x1, y1, x1, y2, self._canvas).draw()
+        else:
+            Line(x1, y1, x1, y2, self._canvas, colour='white').draw()
         if self.has_right_wall:
-            Line(self._x2, self._y1, self._x2, self._y2, self._canvas).draw()
+            Line(x2, y1, x2, y2, self._canvas).draw()
+        else:
+            Line(x2, y1, x2, y2, self._canvas, colour='white').draw()
         if self.has_top_wall:
-            Line(self._x1, self._y1, self._x2, self._y1, self._canvas).draw()
+            Line(x1, y1, x2, y1, self._canvas).draw()
+        else:
+            Line(x1, y1, x2, y1, self._canvas, colour='white').draw()
         if self.has_bottom_wall:
-            Line(self._x1, self._y2, self._x2, self._y2, self._canvas).draw()
+            Line(x1, y2, x2, y2, self._canvas).draw()
+        else:
+            Line(x1, y2, x2, y2, self._canvas, colour='white').draw()
 
     def draw_move(self, to_cell, undo=False):
         center_x = (self._x1 + self._x2)//2
@@ -102,6 +104,7 @@ class Maze:
         self.num_cols = num_cols
         self.cell_size = cell_size
         self.win = win
+        self.cells_to_redraw = []
         if seed:
             random.seed(seed)
         self._create_cells()
@@ -132,7 +135,7 @@ class Maze:
         if self.win is None:
             return
         self.win.redraw()
-        time.sleep(0.05)
+        time.sleep(0.02)
 
     def _break_enter_exit(self):
         self._cells[0][0].has_left_wall = False
@@ -143,34 +146,34 @@ class Maze:
     def _break_walls_r(self, i, j):
         current = self._cells[i][j]
         current.visited = True
-        while True:
-            cords = []
-            if i > 0 and self._cells[i-1][j].visited is False:
-                cords.append((i-1, j))
-            if i < self.num_cols -1 and self._cells[i+1][j].visited is False:
-                cords.append((i+1, j))
-            if j > 0 and self._cells[i][j-1].visited is False:
-                cords.append((i, j-1))
-            if j < self.num_rows -1 and self._cells[i][j+1].visited is False:
-                cords.append((i, j+1))
-            if len(cords) == 0:
-                self._draw_cell(i, j)
-                return
-            chosen = random.choice(cords)
-            if chosen[0] < i::
-                current.has_top_wall = False
-                self._cells[chosen[0]][chosen[1]].has_bottom_wall = False
-            if chosen[0] > i:
-                current.has_bottom_wall = False
-                self._cells[chosen[0]][chosen[1]].has_top_wall = False
-            if chosen[1] < j:
-                current.has_left_wall = False
-                self._cells[chosen[0]][chosen[1]].has_right_wall = False
-            if chosen[1] > j:
-                current.has_right_wall = False
-                self._cells[chosen[0]][chosen[1]].has_left_wall = False
-            self._draw_cell(chosen[0], chosen[1])
-            self._break_walls_r(chosen[0], chosen[1])
+        cords = []
+        if i > 0 and not self._cells[i-1][j].visited:
+            cords.append((i-1, j))
+        if i < self.num_cols - 1 and not self._cells[i+1][j].visited:
+            cords.append((i+1, j))
+        if j > 0 and not self._cells[i][j-1].visited:
+            cords.append((i, j-1))
+        if j < self.num_rows - 1 and not self._cells[i][j+1].visited:
+            cords.append((i, j+1))
+        elif not cords:
+            self._draw_cell(i, j)
+            return
+        chosen = random.choice(cords)
+        if chosen[0] == i+1:
+            current.has_top_wall = False
+            self._cells[chosen[0]][chosen[1]].has_bottom_wall = False
+        if chosen[0] == i-1:
+            current.has_bottom_wall = False
+            self._cells[chosen[0]][chosen[1]].has_top_wall = False
+        if chosen[1] == j+1:
+            current.has_left_wall = False
+            self._cells[chosen[0]][chosen[1]].has_right_wall = False
+        if chosen[1] > j-1:
+            current.has_right_wall = False
+            self._cells[chosen[0]][chosen[1]].has_left_wall = False
+        self._draw_cell(i, j)
+        self._break_walls_r(chosen[0], chosen[1])
+        self._draw_cell(chosen[0], chosen[1])
 
     def _reset_visited(self):
         for i in self._cells:
@@ -183,11 +186,12 @@ def main():
     num_cols = 10
     num_rows = 12
     cell_size = 50
-    maze = Maze(0, 0, num_rows, num_cols, cell_size, window, 20)
-    maze._break_enter_exit()
+    maze = Maze(50, 50, num_rows, num_cols, cell_size, window, 10)
+    maze._reset_visited()
     maze._break_walls_r(0, 0)
+    maze._break_enter_exit()
+    window.redraw()
     window.start()
-    window.wait_for_close()
 
 
 main()
