@@ -183,43 +183,51 @@ class Maze:
         return self._solve_r(i, j)
 
     def _solve_r(self, i, j):
+        print(f'enter solve_r at {i}, {j}')
         self._animate()
         self._cells[i][j].visited = True
         if self._cells[i][j] == self._cells[self.num_cols-1][self.num_rows-1]:
             return True
         if self._cells[i-1][j] is not None and self._cells[i-1][j].has_right_wall is False and self._cells[i-1][j].visited is False:
+            print('Attempt to move to cell (i-1, j)')
             Cell.draw_move(self._cells[i][j], self._cells[i-1][j])
             result = self._solve_r(i-1, j)
             if result is True:
                 return True
             else:
+                print('Attempt to undo to cell (i-1, j)')
                 Cell.draw_move(self._cells[i][j], self._cells[i-1][j], undo=True)
 
-        if self._cells[i+1][j] is not None and self._cells[i+1][j].has_left_wall is False and self._cells[i-1][j].visited is False:
+        if self._cells[i+1][j] is not None and self._cells[i+1][j].has_left_wall is False and self._cells[i+1][j].visited is False:
+            print('Attempt to move to cell (i+1, j)')
             Cell.draw_move(self._cells[i][j], self._cells[i+1][j])
             result = self._solve_r(i+1, j)
             if result is True:
                 return True
             else:
+                print('Attempt to undo to cell (i+1, j)')
                 Cell.draw_move(self._cells[i][j], self._cells[i+1][j], undo=True)
 
         if self._cells[i][j-1] is not None and self._cells[i][j-1].has_top_wall is False and self._cells[i][j-1].visited is False:
+            print('Attempt to move to cell (i, j-1)')
             Cell.draw_move(self._cells[i][j], self._cells[i][j-1])
-            result = self._solve_r(i-1, j)
+            result = self._solve_r(i, j-1)
             if result is True:
                 return True
             else:
+                print('Attempt to undo to cell (i, j-1)')
                 Cell.draw_move(self._cells[i][j], self._cells[i][j-1], undo=True)
 
         if self._cells[i][j+1] is not None and self._cells[i][j+1].has_bottom_wall is False and self._cells[i][j+1].visited is False:
+            print('Attempt to move to cell (i, j+1)')
             Cell.draw_move(self._cells[i][j], self._cells[i][j+1])
-            result = self._solve_r(i+1, j)
+            result = self._solve_r(i, j+1)
             if result is True:
                 return True
             else:
+                print('Attempt to undo to cell (i, j+1)')
                 Cell.draw_move(self._cells[i][j], self._cells[i][j+1], undo=True)
-        else:
-            return False
+        return False
 
 
 def main():
@@ -230,8 +238,8 @@ def main():
     maze = Maze(50, 50, num_rows, num_cols, cell_size, window, 10)
     maze._break_walls_r(0, 0)
     maze._break_enter_exit()
-    maze.solve()
-    window.redraw()
+    maze._reset_visited()
+    maze._solve_r(0, 0)
     window.start()
 
 
